@@ -11,7 +11,7 @@ BuildSigmaMat <- function(avG, n){
   #Fill the lower right quadrant of S
   Smat[1:n,(n+1):neigten] <- sqrt(2) * cov(varmat,covmat) 
   #Fill the upper right quadrant of S
-  Smat[(n+1):neigten,1:n] <- sqrt(2) *cov(covmat,varmat) 
+  Smat[(n+1):neigten,1:n] <- sqrt(2) * cov(covmat,varmat) 
   return(Smat)
 }
 
@@ -74,5 +74,3 @@ covtensor <- function(Gs){
 }
 #END
 library(Morphometrics); library(gdata);library(matrixcalc);library(MCMCglmm)
-Gs = array(0, dim = c(5, 5, 3, 10))
-for(i in 1:3){ for (j in 1:10){ Gs[,,i,j] = RandomMatrix(5)} }
