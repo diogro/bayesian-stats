@@ -71,7 +71,7 @@ generateMCMCArray = function(num.traits){
   return(Ps)
 }
 
-PlotBayesianRS <- function (R.Proj, Ps){
+PlotBayesianRS <- function (MCMC.R.proj, Ps){
   proj<- function(G,b) t(b) %*% G %*% (b)
   #Function to do projection
   n <- dim(Ps)[[1]]
