@@ -32,7 +32,7 @@ R.proj <- function(Gs, p = 0.95, vec = 1000){
   }
   #for a given random vector, examine if the HPDintervals of any pair of  G matrices overlap
   vec.score <-cbind(rand.vec,proj.score)
-  colnames(vec.score) <- c(1:8,paste(dimnames(Gs)[[3]][prs.comp[, 1]], ".vs.", dimnames(Gs)[[3]][prs.comp[, 2]], sep = ""))
+  colnames(vec.score) <- c(1:n, paste(dimnames(Gs)[[3]][prs.comp[, 1]], ".vs.", dimnames(Gs)[[3]][prs.comp[, 2]], sep = ""))
   #collate the random vectors and the outcome of their projection on the G matrices
   sig.vec <- subset(vec.score,rowSums(vec.score[,(n+1):(n+((m^2 - m)/2))]) > 0) 
   #collate just the random vectors that resulted signficant differences in variance
