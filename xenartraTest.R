@@ -34,7 +34,6 @@ runMCMCModel <- function(otu, num.traits){
       rownames(current.matrix) <- colnames(current.matrix) <- trait.names 
     }
     n = dim(otu$data[complete.cases(otu$data[,trait.names]),])[1]
-    current.matrix = solve(diag(num.traits) + n*solve(current.matrix))/(n+1)
     Ps = MonteCarloStat(current.matrix, num.traits+1, 1000, ComparisonFunc=function(x, y) y, cov)
     Ps = aperm(Ps, c(2,3,1))
     dimnames(Ps) = list(trait.names, trait.names)
@@ -56,6 +55,8 @@ runMCMCModel <- function(otu, num.traits){
   }
   return(Ps)
 }
+
+llply(x, getModel)
 
 for(i in 1:length(x)){
   x[[i]]$data <- cbind(x[[i]]$raw, x[[i]]$categorical)
@@ -107,3 +108,9 @@ PlotBayesianRS <- function (MCMC.R.proj, Ps){
   plot.list = alply(1:n, 1, function(x) plot.func(x))
   return(plot.list)
 }
+
+Ps = generateMCMCArray(35)
+Ps = Ps[,,,901:1000]
+MCMC.R.proj = R.proj(Ps)
+plots = PlotBayesianRS(MCMC.R.proj, Ps)
+
