@@ -25,12 +25,12 @@ trait.names = paste("cbind(", paste(names(data)[1:num.traits], collapse=','), ")
 fixed.effects = "trait:as.factor(ESPECIE) - 1"
 formula = paste(trait.names, fixed.effects, sep = "~")
 
-mcmc.model = MCMCglmm( as.formula(formula) , 
-                      data = data, 
-                      prior = prior,
-                      rcov = ~us(trait):units,
-                      family = rep("gaussian", num.traits),
-                      verbose = TRUE)
+mcmc.model = MCMCglmm( as.formula(formula),
+                       data = data, 
+                       prior = prior,
+                       rcov = ~us(trait):units,
+                       family = rep("gaussian", num.traits),
+                       verbose = TRUE)
 
 Ps = array(mcmc.model$VCV, dim = c(1000, num.traits, num.traits))
 avP = apply(Ps, 2:3, mean)
