@@ -18,7 +18,7 @@ nnonzero <- min(n*(n+1)/2,m-1)
 HPD.eT.val <- cbind(HPDinterval(as.mcmc(MCMC.covtensor$MCMCSeigvals[,1:nnonzero]), prob=0.95), 
                     HPDinterval(as.mcmc(MCMC.covtensor.rand$MCMCSeigvals[,1:nnonzero]), prob=0.95))
 round(HPD.eT.val,3)
-round(MCMC.covtensor$ordered.tensor.summary[1:16,2:9],3)par(mfrow=c(1,1))
+round(MCMC.covtensor$ordered.tensor.summary[1:16,2:9],3)
 
 PlotCovTensor <- function(MCMC.covtensor, MCMC.covtensor.rand){
   
