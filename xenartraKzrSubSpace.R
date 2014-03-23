@@ -13,7 +13,8 @@ MCMCG.kr.xenartra <- kr.subspace(Ps, vec = rep(n/2, m))
 MCMCG.kr.rand <- kr.subspace(rand.Ps, vec = rep(n/2, m))
 
 PlotKrzSubspace <- function(MCMCG.kr, MCMCG.kr.rand){
-  HPD.H.val <- cbind(HPDinterval(as.mcmc(MCMCG.kr$MCMC.H.val)), HPDinterval(as.mcmc(MCMCG.kr.rand$MCMC.H.val)))
+  HPD.H.val <- cbind(HPDinterval(as.mcmc(MCMCG.kr$MCMC.H.val)), 
+                     HPDinterval(as.mcmc(MCMCG.kr.rand$MCMC.H.val)))
   
   dat.observed = as.data.frame(HPD.H.val[,1:2])
   dat.random = as.data.frame(HPD.H.val[,3:4])

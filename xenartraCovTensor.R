@@ -9,9 +9,10 @@ rand.Ps = laply(dimnames(Ps)[[3]],
                                            ComparisonFunc=function(x, y) y, cov))
 rand.Ps = aperm(rand.Ps, c(3, 4, 1, 2))
 
-MCMC.covtensor <- covtensor(Ps)
-MCMC.covtensor.rand <- covtensor(rand.Ps)
-save(MCMC.covtensor, MCMC.covtensor.rand, file = 'covtensor-35.RData')
+# MCMC.covtensor <- covtensor(Ps)
+# MCMC.covtensor.rand <- covtensor(rand.Ps)
+# save(MCMC.covtensor, MCMC.covtensor.rand, file = 'covtensor-35.RData')
+load('./covtensor-35.RData')
 
 nnonzero <- min(n*(n+1)/2,m-1)
 
