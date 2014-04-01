@@ -8,27 +8,32 @@ tree.25 <- read.tree(text = TREE)
 TREE <- "(((Bradypus:1,Choloepus:1):1,((Tamandua:1,Myrmecophaga:1):1,Cyclopes:1):1):1,(Dasypus:1,(((Tolypeutes:1,Cabassous:1):1,Priodontes:1):1,((Zaedyus:1,Chaetophractus:1):1,Euphractus:1):1):1):1);"
 tree.35 <- read.tree(text = TREE)
 
+tree = tree.25
+sample.size = sample.size$D25
+
 KrzMCMC = function(Ps, tree, sample.size) {
-  # First we calculate the mean a posteriory estimates for the population matrices
-  avgPs = llply(alply(apply(Ps, 1:3, mean), 3), function(x) as.matrix(nearPD(x)[[1]]))
-  names(avgPs) = dimnames(Ps)[[3]]
-  # Then, using AncestralStates, we calculate the within group W-matrix.
-  avgP = AncestralStates(tree, avgPs, sample.size)[[tree$edge[1,1]]]
-  m = dim(Ps)[3]
-  n = dim(Ps)[1]
-  # This W-matrix is assumed to be share between all popualtions to form
-  # the null hipotesis, and we draw 100 Wishart samples for each population,
-  # representing a null distribution of matrices.
-  rand.Ps = laply(dimnames(Ps)[[3]],
-                  function(x) MonteCarloStat(avgP,
-                                             samples[which(dimnames(Ps)[[3]]==x)], 100,
-                                             ComparisonFunc=function(x, y) y, cov))
-  rand.Ps = aperm(rand.Ps, c(3, 4, 1, 2))
-  # We then calculate the shared subspace for the observed and random samples.
-  MCMCG.kr.xenartra <- kr.subspace(Ps, vec = rep(n/2, m))
-  MCMCG.kr.rand <- kr.subspace(rand.Ps, vec = rep(n/2, m))
-  return(list(obs = MCMCG.kr.xenartra,
-              rand = MCMCG.kr.rand))
+    m = dim(Ps)[3]
+    n = dim(Ps)[1]
+    SamplePop = function(pop_Ps, n.ind, otu){
+        pop = adply(pop_Ps, 3, function(x) mvtnorm::rmvnorm(n = n.ind,
+                                                            mean = rep(0, dim(x)[2]),
+                                                            sigma = x))
+        pop$'.id' = otu
+        return(pop)
+    }
+    pop_Ps = ldply(dimnames(Ps)[[3]], function(otu) SamplePop(Ps[,,which(dimnames(Ps)[[3]]==otu),],
+                                                               sample.size[which(dimnames(Ps)[[3]]==otu)],
+                                                               otu))
+    shuffle = sample(dim(pop_Ps)[1])
+    pop_Ps$'.id' = pop_Ps$'.id'[shuffle]
+    pop_Ps$'X1' = pop_Ps$'X1'[shuffle]
+    rand.Ps = daply(pop_Ps, .(X1, .id), function(x) cov(x[-c(1, dim(x)[2])]))
+    rand.Ps = aperm(rand.Ps, c(3, 4, 2, 1))
+    # We then calculate the shared subspace for the observed and random samples.
+    MCMCG.kr.xenartra <- kr.subspace(Ps, vec = rep(n/2, m))
+    MCMCG.kr.rand <- kr.subspace(rand.Ps, vec = rep(n/2, m))
+    return(list(obs = MCMCG.kr.xenartra,
+                rand = MCMCG.kr.rand))
 }
 
 load('./maindata.RData')
