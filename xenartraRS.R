@@ -1,42 +1,62 @@
-source('./xenartraSamples.R')
 source('./b_random_skewers.R')
 
-PlotBayesianRS <- function (MCMC.R.proj, Ps){
-  proj<- function(G,b) t(b) %*% G %*% (b)
-  #Function to do projection
-  n <- dim(Ps)[[1]]
-  m <- dim(Ps)[[3]]
-  MCMCsamp <- dim(Ps)[[4]]
-  R.vec.proj <- array(,c(MCMCsamp,m,n))
-  for (i in 1:n){
-    R.vec.proj[,,i] <- t(apply(Ps, 3:4, proj, b = MCMC.R.proj$eig.R$vectors[,i]))
-  }
-  #Genetic variance in each population in the direction of the eigenvectors of R
-  
-  HPD.R.vec.proj <- array(,c(m,2,n))
-  for (i in 1:n){
-    HPD.R.vec.proj[,,i] <- HPDinterval(as.mcmc(R.vec.proj[,,i]), prob = 0.95)    
-  }
-  dimnames(HPD.R.vec.proj)[[1]] = dimnames(Ps)[[3]]
-  #HPD intervals for the genetic variance in each population in the direction of the eigenvectors of R
-  
-  dat = adply(HPD.R.vec.proj, 1:3)
-  names(dat) = c('pop', 'interval', 'trait', 'value')
-  dat = dcast(dat, pop+trait~interval)
-  names(dat) = c('pop', 'trait', 'lower', 'upper')
-  # levels(dat$pop) <- Gnames
-  dat$mean = rowMeans(cbind(dat$upper, dat$lower))
-  plot.func = function(eigen.number) {
-    label = paste('Pc', eigen.number)
-    plot = ggplot(subset(dat, trait==eigen.number), aes(pop, mean)) + geom_point() + 
-      geom_errorbar(aes( ymin=lower, ymax=upper)) + theme_bw() + 
-      theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
-      xlab(label) + ylab('Genetic Variance') 
-    return(plot)
-  }
-  plot.list = alply(1:n, 1, function(x) plot.func(x))
-  return(plot.list)
-}
 
-MCMC.R.proj = R.proj(Ps)
-plots = PlotBayesianRS(MCMC.R.proj, Ps)
+
+# save( MCMC.R.proj.25, 
+#       MCMC.R.proj.28,
+#       MCMC.R.proj.32, 
+#       MCMC.R.proj.35, 
+#       MCMC.R.proj.32.noMyr,
+#       MCMC.R.proj.35.noMyr,
+#       file = 'rs.proj.Rdata')
+
+load('rs.proj.Rdata')
+
+load('./xenartraMCMC.25.samples.Rdata')
+
+#MCMC.R.proj.25 = R.proj(Ps)
+rs.plots.25 = PlotBayesianRS(MCMC.R.proj.25, Ps)
+
+load('./xenartraMCMC.28.samples.Rdata')
+
+#MCMC.R.proj.28 = R.proj(Ps)
+rs.plots.28 = PlotBayesianRS(MCMC.R.proj.28, Ps, 4)
+graphics.off()
+
+load('./xenartraMCMC.32.samples.Rdata')
+
+#MCMC.R.proj.32 = R.proj(Ps)
+rs.plots.32 = PlotBayesianRS(MCMC.R.proj.32, Ps, 4)
+graphics.off()
+
+load('./xenartraMCMC.35.samples.Rdata')
+
+#MCMC.R.proj.35 = R.proj(Ps)
+rs.plots.35 = PlotBayesianRS(MCMC.R.proj.35, Ps)
+graphics.off()
+
+source('xenartraSamples.R')
+x$Myrmecophaga <- NULL
+
+#Ps.35.noMyr = generateMCMCArray(35)
+#MCMC.R.proj.35.noMyr = R.proj(Ps.35.noMyr)
+rs.plots.35.noMyr = PlotBayesianRS(MCMC.R.proj.35.noMyr, Ps.35.noMyr)
+graphics.off()
+
+#Ps.32.noMyr = generateMCMCArray(32)
+#MCMC.R.proj.32.noMyr = R.proj(Ps.32.noMyr)
+rs.plots.32.noMyr = PlotBayesianRS(MCMC.R.proj.32.noMyr, Ps.32.noMyr, 4)
+graphics.off()
+
+
+
+rs.plots = list('25' = rs.plots.25,
+                '28' = rs.plots.28,
+                '32' = rs.plots.32,
+                '35' = rs.plots.35)#,
+                #'32.noMyr' = rs.plots.32.noMyr,
+                #'35.noMyr' = rs.plots.35.noMyr)
+
+save(rs.plots, file = 'rs.Rdata')
+
+

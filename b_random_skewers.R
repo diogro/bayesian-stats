@@ -45,4 +45,40 @@ R.proj <- function(Gs, p = 0.95, vec = 1000){
   #eigen analysis of the R matrix
   list(G.proj = G.proj, vec.score = vec.score, eig.R = eig.R)
 }
-#END
+
+PlotBayesianRS <- function (MCMC.R.proj, Ps, ncols = 5){
+  library(reshape2)
+
+  proj<- function(G,b) t(b) %*% G %*% (b)
+  #Function to do projection
+  n <- dim(Ps)[[1]]
+  m <- dim(Ps)[[3]]
+  MCMCsamp <- dim(Ps)[[4]]
+  R.vec.proj <- array(,c(MCMCsamp,m,n))
+  for (i in 1:n){
+    R.vec.proj[,,i] <- t(apply(Ps, 3:4, proj, b = MCMC.R.proj$eig.R$vectors[,i]))
+  }
+  #Genetic variance in each population in the direction of the eigenvectors of R
+  
+  HPD.R.vec.proj <- array(,c(m,2,n))
+  for (i in 1:n){
+    HPD.R.vec.proj[,,i] <- HPDinterval(as.mcmc(R.vec.proj[,,i]), prob = 0.95)    
+  }
+  dimnames(HPD.R.vec.proj)[[1]] = dimnames(Ps)[[3]]
+  #HPD intervals for the genetic variance in each population in the direction of the eigenvectors of R
+  
+  dat = adply(HPD.R.vec.proj, 1:3)
+  names(dat) = c('pop', 'interval', 'trait', 'value')
+  dat = dcast(dat, pop+trait~interval)
+  names(dat) = c('pop', 'trait', 'lower', 'upper')
+  dat$trait = paste0("PC", dat$trait)
+  order.list = paste0("PC", 1:n)
+  dat$trait = factor(dat$trait, levels = order.list)
+  # levels(dat$pop) <- Gnames
+  dat$mean = rowMeans(cbind(dat$upper, dat$lower))
+  plot = ggplot(dat, aes(pop, mean)) + geom_point() + 
+      geom_errorbar(aes( ymin=lower, ymax=upper)) + theme_bw() + 
+      theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+     ylab('Genetic Variance') + facet_wrap(~ trait, ncol = ncols, scales = "free_y")
+  return(plot)
+}

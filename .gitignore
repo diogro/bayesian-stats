@@ -3,3 +3,10 @@
 *.RData
 *.Rdata
 *.csv
+*.aux
+*.html
+*.tex
+*.md
+*.pdf
+*.out
+figure/*

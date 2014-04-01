@@ -73,4 +73,33 @@ covtensor <- function(Gs){
   list(Smat = Smat, eTmat = eTmat, ordered.tensor.summary = ordered.tensor.summary, avG.coord = avG.coord, MCMCSeigvals = MCMCSeigvals, MCMCG.coord = MCMCG.coord)
 }
 #END
-library(Morphometrics); library(gdata);library(matrixcalc);library(MCMCglmm)
+
+CovTensorDataFrame <- function(MCMC.covtensor, MCMC.covtensor.rand, n){
+  
+  m = sum(!is.na(sample.size[paste('D',n, sep='')]))
+  nnonzero <- min(n*(n+1)/2,m-1)
+  
+  HPD.eT.val <- cbind(HPDinterval(as.mcmc(MCMC.covtensor$MCMCSeigvals[,1:nnonzero]), prob=0.95), 
+                      HPDinterval(as.mcmc(MCMC.covtensor.rand$MCMCSeigvals[,1:nnonzero]), prob=0.95))
+  
+  dat.observed = as.data.frame(HPD.eT.val[,1:2])
+  dat.random = as.data.frame(HPD.eT.val[,3:4])
+  dat.observed$class = 'observed'
+  dat.random$class = 'random'
+  dat.observed$PC = dat.random$PC = paste('PC', 1:nnonzero, sep = '')
+  dat = rbind(dat.observed, dat.random)
+  dat = mutate(dat, mean = rowMeans(cbind(lower, upper)))
+  
+  orderlist = paste('PC', 1:nnonzero, sep = '')
+  dat$PC = factor(dat$PC, orderlist)
+  dat$n.traits = paste(n, "D")
+  return(dat)
+}
+
+PlotCovTensor = function(dat){
+  plot = ggplot(dat, aes(PC, mean, color = class, group = PC)) + scale_y_log10() + 
+    geom_point() + geom_errorbar(aes(ymin=lower, ymax=upper)) + theme_bw() + 
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
+    xlab('eigenvectors') + ylab('eigenvalues') + facet_wrap(~ n.traits, ncol = 2, scales = "free_y")
+  return(plot)
+}

@@ -5,8 +5,6 @@ library(matrixcalc)
 library(ggplot2)
 library(Morphometrics)
 library(reshape2)
-library(doMC)
-library(foreach)
 
 load("./maindata.RData")
 
@@ -71,8 +69,3 @@ generateMCMCArray = function(num.traits){
   dimnames(Ps)[[3]] = names(x[mask])
   return(Ps)
 }
-
-# Ps = generateMCMCArray(35)
-# Ps = Ps[,,,901:1000]
-# save(Ps, file = 'xenatraMCMC.samples.Rdata')
-load('./xenatraMCMC.samples.Rdata')
