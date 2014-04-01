@@ -1,15 +1,5 @@
 source('./KrzSubspace.R')
-
 library(Morphometrics)
-library(ape)
-TREE <- "(((Bradypus:1,Choloepus:1,Paramylodon:1):1,((Tamandua:1,Myrmecophaga:1):1,Cyclopes:1):1):1,(Dasypus:1,(((Tolypeutes:1,Cabassous:1):1,Priodontes:1):1,((Zaedyus:1,Chaetophractus:1):1,Euphractus:1):1):1):1);"
-tree.25 <- read.tree(text = TREE)
-
-TREE <- "(((Bradypus:1,Choloepus:1):1,((Tamandua:1,Myrmecophaga:1):1,Cyclopes:1):1):1,(Dasypus:1,(((Tolypeutes:1,Cabassous:1):1,Priodontes:1):1,((Zaedyus:1,Chaetophractus:1):1,Euphractus:1):1):1):1);"
-tree.35 <- read.tree(text = TREE)
-
-tree = tree.25
-sample.size = sample.size$D25
 
 KrzMCMC = function(Ps, tree, sample.size) {
     m = dim(Ps)[3]
@@ -22,8 +12,8 @@ KrzMCMC = function(Ps, tree, sample.size) {
         return(pop)
     }
     pop_Ps = ldply(dimnames(Ps)[[3]], function(otu) SamplePop(Ps[,,which(dimnames(Ps)[[3]]==otu),],
-                                                               sample.size[which(dimnames(Ps)[[3]]==otu)],
-                                                               otu))
+                                                              sample.size[which(dimnames(Ps)[[3]]==otu)],
+                                                              otu))
     shuffle = sample(dim(pop_Ps)[1])
     pop_Ps$'.id' = pop_Ps$'.id'[shuffle]
     pop_Ps$'X1' = pop_Ps$'X1'[shuffle]
