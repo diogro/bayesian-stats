@@ -12,7 +12,7 @@ load('rs.proj.Rdata')
 
 rs.plots = list()
 rs.plots[['25']] = PlotBayesianRS(MCMC.R.proj[['25']], Ps[['25']])
-rs.plots[['29']] = PlotBayesianRS(MCMC.R.proj[['28']], Ps[['28']], 4)
+rs.plots[['28']] = PlotBayesianRS(MCMC.R.proj[['28']], Ps[['28']], 4)
 rs.plots[['32']] = PlotBayesianRS(MCMC.R.proj[['32']], Ps[['32']], 4)
 rs.plots[['35']] = PlotBayesianRS(MCMC.R.proj[['35']], Ps[['35']])
 save(rs.plots, file = 'rs.Rdata')
