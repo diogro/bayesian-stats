@@ -32,21 +32,12 @@ covTensor = function(Ps, tree, sample.size) {
               rand = MCMC.covtensor.rand))
 }
 
-#MCMC.covTensor = list()
-
-#load('./xenartraMCMC.25.samples.Rdata')
-#MCMC.covTensor[['25']] = covTensor(Ps, tree.25, sample.size$D25)
-
-#load('./xenartraMCMC.28.samples.Rdata')
-#MCMC.covTensor[['28']] = covTensor(Ps, tree.25, sample.size$D28)
-
-#load('./xenartraMCMC.32.samples.Rdata')
-#MCMC.covTensor[['32']] = covTensor(Ps, tree.35, sample.size$D32)
-
-#load('./xenartraMCMC.35.samples.Rdata')
-#MCMC.covTensor[['35']] = covTensor(Ps, tree.35, sample.size$D35)
-
-#save(MCMC.covTensor, file = 'xenartraCovTensor.Rdata')
+MCMC.covTensor = list()
+MCMC.covTensor[['25']] = covTensor(Ps[['25']], tree.25, sample.size$D25)
+MCMC.covTensor[['28']] = covTensor(Ps[['28']], tree.25, sample.size$D28)
+MCMC.covTensor[['32']] = covTensor(Ps[['32']], tree.35, sample.size$D32)
+MCMC.covTensor[['35']] = covTensor(Ps[['35']], tree.35, sample.size$D35)
+save(MCMC.covTensor, file = 'xenartraCovTensor.Rdata')
 load('xenartraCovTensor.Rdata')
 
 dat.cov.tensor = ldply(names(MCMC.covTensor),
@@ -55,6 +46,7 @@ dat.cov.tensor = ldply(names(MCMC.covTensor),
                                                        as.numeric(x)))
 
 cov.tensor.plot = PlotCovTensor(dat.cov.tensor)
+ggsave("~/Desktop/cov_tensor_plot.png")
 
 m = dim(Ps)[3]
 n = dim(Ps)[1]
