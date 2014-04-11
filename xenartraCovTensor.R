@@ -32,12 +32,12 @@ covTensor = function(Ps, tree, sample.size) {
               rand = MCMC.covtensor.rand))
 }
 
-MCMC.covTensor = list()
-MCMC.covTensor[['25']] = covTensor(Ps[['25']], tree.25, sample.size$D25)
-MCMC.covTensor[['28']] = covTensor(Ps[['28']], tree.25, sample.size$D28)
-MCMC.covTensor[['32']] = covTensor(Ps[['32']], tree.35, sample.size$D32)
-MCMC.covTensor[['35']] = covTensor(Ps[['35']], tree.35, sample.size$D35)
-save(MCMC.covTensor, file = 'xenartraCovTensor.Rdata')
+#MCMC.covTensor = list()
+#MCMC.covTensor[['25']] = covTensor(Ps[['25']], tree.25, sample.size$D25)
+#MCMC.covTensor[['28']] = covTensor(Ps[['28']], tree.25, sample.size$D28)
+#MCMC.covTensor[['32']] = covTensor(Ps[['32']], tree.35, sample.size$D32)
+#MCMC.covTensor[['35']] = covTensor(Ps[['35']], tree.35, sample.size$D35)
+#save(MCMC.covTensor, file = 'xenartraCovTensor.Rdata')
 load('xenartraCovTensor.Rdata')
 
 dat.cov.tensor = ldply(names(MCMC.covTensor),
