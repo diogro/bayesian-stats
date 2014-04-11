@@ -31,17 +31,10 @@ sample.size = ldply(x, function(x) as.data.frame(x$df))
 
 MCMC.kr = list()
 
-load('./xenartraMCMC.25.samples.Rdata')
-MCMC.kr[['25']] = KrzMCMC(Ps, tree.25, sample.size$D25)
-
-load('./xenartraMCMC.28.samples.Rdata')
-MCMC.kr[['28']] = KrzMCMC(Ps, tree.25, sample.size$D28)
-
-load('./xenartraMCMC.32.samples.Rdata')
-MCMC.kr[['32']] = KrzMCMC(Ps, tree.35, sample.size$D32)
-
-load('./xenartraMCMC.35.samples.Rdata')
-MCMC.kr[['35']] = KrzMCMC(Ps, tree.35, sample.size$D35)
+MCMC.kr[['25']] = KrzMCMC(Ps[['25']], tree.25, sample.size$D25)
+MCMC.kr[['28']] = KrzMCMC(Ps[['28']], tree.25, sample.size$D28)
+MCMC.kr[['32']] = KrzMCMC(Ps[['32']], tree.35, sample.size$D32)
+MCMC.kr[['35']] = KrzMCMC(Ps[['35']], tree.35, sample.size$D35)
 
 dat.krz = ldply(names(MCMC.kr),
                 function(x) KrzSubspaceDataFrame (MCMC.kr[[x]][[1]],
@@ -50,6 +43,7 @@ dat.krz = ldply(names(MCMC.kr),
 
 krz.plot = PlotKrzSubspace(dat.krz)
 print(krz.plot)
+ggsave("~/Desktop/krz_projection.png", height = 20, width = 30, units = "cm")
 
 # divergent.eigen = round(eigen(MCMCG.kr.xenartra$avH)$vectors,3)[,1:10]
 # rownames(divergent.eigen) = dimnames(Ps)[[1]]

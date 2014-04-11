@@ -1,10 +1,21 @@
+library(plyr)
+library(MCMCglmm)
+library(gdata)
+library(matrixcalc)
+library(ggplot2)
+library(Morphometrics)
+library(reshape2)
+
 BuildSigmaMat <- function(avG, n){
   neigten <- n*(n+1)/2
+  m = dim(avG)[[3]]
   Smat <- matrix(nrow=neigten, ncol=neigten)
-  varmat <- t(apply(avG, 3, diag))
-  #Find the variances of the jth G and store them
-  covmat <- t(apply(avG, 3, lowerTriangle))
-  #Find the covariances of the jth G and store them
+  varmat <- matrix(nrow=m, ncol=n)
+  covmat <- matrix(nrow=m, ncol=(n*n-n)/2)
+  for(i in 1:m){
+    varmat[i,] = diag(avG[,,i])
+    covmat[i,] = lowerTriangle(avG[,,i])
+  }
   Smat[1:n,1:n] <- cov(varmat,varmat)
   #Fill the upper left quadrant of S
   Smat[(n+1):neigten,(n+1):neigten] <-2*cov(covmat,covmat)
@@ -53,12 +64,10 @@ covtensor <- function(Gs){
   }
   if(is.na(dim(Gs)[4])) {warning("There are no MCMCsamples"); MCMCSeigvals <- "NA";  MCMCG.coord <- "NA"}  else {
     MCMCSeigvals <- matrix(,MCMCsamp,neigten)
-    for (k in 1:MCMCsamp){
-      for (l in 1:neigten){
-        MCMCSmat <- BuildSigmaMat(Gs[,,,k], n)
-        MCMCSeigvals[k,l] <- t(Seigvecs[,l]) %*% MCMCSmat %*% Seigvecs[,l]
-      }
-    }
+    for (k in 1:MCMCsamp)
+      for (l in 1:neigten)
+        MCMCSeigvals[k,l] <- t(Seigvecs[,l]) %*% BuildSigmaMat(Gs[,,,k], n) %*% Seigvecs[,l]
+
     MCMCG.coord <- array(,c(m, neigten, MCMCsamp))
     for (i in 1:neigten){
       MCMCG.coord[,i,] <- apply(Gs, 3:4, frobenius.prod, y = eTmat[,,i])

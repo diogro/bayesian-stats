@@ -34,8 +34,9 @@ runMCMCModel <- function(otu, num.traits){
                               prior = prior,
                               rcov = ~us(trait):units,
                               family = rep("gaussian", num.traits),
+                              thin = 100,
                               verbose = FALSE)
-        Ps = array(mcmc.model$VCV, dim = c(1000, num.traits, num.traits))
+        Ps = array(mcmc.model$VCV, dim = c(100, num.traits, num.traits))
         Ps = aperm(Ps, c(2,3,1))
         dimnames(Ps) = list(trait.names, trait.names)
         return(Ps)
@@ -48,9 +49,10 @@ runMCMCModel <- function(otu, num.traits){
                               data = data,
                               prior = prior,
                               rcov = ~us(trait):units,
+                              thin = 100,
                               family = rep("gaussian", num.traits),
                               verbose = FALSE)
-        Ps = array(mcmc.model$VCV, dim = c(1000, num.traits, num.traits))
+        Ps = array(mcmc.model$VCV, dim = c(100, num.traits, num.traits))
         vars = mcmcVar(otu, num.traits)
         Ps = Ps * vars
         Ps = aperm(Ps, c(2,3,1))
@@ -72,6 +74,7 @@ mcmcVar <- function(otu, num.traits){
                           prior = prior,
                           rcov = ~idh(trait):units,
                           family = rep("gaussian", num.traits),
+                          thin = 100,
                           verbose = FALSE)
     vars = aaply(mcmc.model$VCV, 1, function(x) outer(sqrt(x), sqrt(x)))
     return(vars)

@@ -17,5 +17,5 @@ rs.plots[['32']] = PlotBayesianRS(MCMC.R.proj[['32']], Ps[['32']], 4)
 rs.plots[['35']] = PlotBayesianRS(MCMC.R.proj[['35']], Ps[['35']])
 save(rs.plots, file = 'rs.Rdata')
 
-for(i in names(rs.plots)) ggsave(paste0("~/Desktop/", i,".png"), rs.plots[[i]], width = 40, height = 20, units = "cm")
+for(i in names(rs.plots)) ggsave(paste0("~/Desktop/RS.plot.", i,"D.png"), rs.plots[[i]], width = 40, height = 20, units = "cm")
 
