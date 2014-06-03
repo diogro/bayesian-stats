@@ -9,7 +9,7 @@ Sys.setlocale(locale="C")
 
 load("./maindata.RData")
 
-getModel <- function(otu){
+getModel = function(otu){
   models = otu$model[!is.na(otu$model)]
   models = models[[1]]
   fixed = as.character(models$call$formula)[[3]]
@@ -24,7 +24,7 @@ getModel <- function(otu){
   return(fixed.effects)
 }
 
-runMCMCModel <- function(otu, num.traits){
+runMCMCModel = function(otu, num.traits){
     trait.names = rownames(otu$vcv[[paste0("D", num.traits)]])
     traits = paste("cbind(", paste(trait.names, collapse=','), ")", sep = '')
     formula = paste(traits, otu$fixed, sep = "~")
@@ -67,7 +67,7 @@ runMCMCModel <- function(otu, num.traits){
 
 otu = x$'Myrmecophaga'
 num.traits = 25
-mcmcVar <- function(otu, num.traits){
+mcmcVar = function(otu, num.traits){
     trait.names = rownames(otu$vcv[[paste("D", num.traits, sep='')]])
     traits = paste("cbind(", paste(trait.names, collapse=','), ")", sep = '')
     formula = paste(traits, otu$fixed, sep = "~")
@@ -89,10 +89,9 @@ mcmcVar <- function(otu, num.traits){
 llply(x, getModel)
 
 for(i in 1:length(x)){
-  x[[i]]$data <- cbind(x[[i]]$raw, x[[i]]$categorical)
-  x[[i]]$fixed <- getModel(x[[i]])
+  x[[i]]$data = cbind(x[[i]]$raw, x[[i]]$categorical)
+  x[[i]]$fixed = getModel(x[[i]])
 }
-
 
 generateMCMCArray = function(num.traits){
   mask = !laply(x, function(otu) all(is.na(otu$vcv[[paste0("D", num.traits)]])))
@@ -120,4 +119,6 @@ mats = llply(x, function(x) x$vcv$D25)
 
 i = 1
 RandomSkewers(alply(Ps[['25']][,,i,], 3), mats[[i]], num.cores=10)
-plot(laply(mats, function(x) sum(diag(x)))~laply(mat.list, function(x) sum(diag(x))))
+
+#diags = melt(adply(Ps[[1]], 3, function(x) aaply(x, 3, diag)))
+#ggplot(diags, aes(X1, value, color = X1)) + geom_boxplot() + facet_wrap(~variable, scale= "free")

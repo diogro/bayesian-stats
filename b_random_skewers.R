@@ -68,15 +68,15 @@ PlotBayesianRS <- function (MCMC.R.proj, Ps, ncols = 5){
   #HPD intervals for the genetic variance in each population in the direction of the eigenvectors of R
 
   dat = adply(HPD.R.vec.proj, 1:3)
-  names(dat) = c('pop', 'interval', 'trait', 'value')
-  dat = dcast(dat, pop+trait~interval)
-  names(dat) = c('pop', 'trait', 'lower', 'upper')
+  names(dat) = c('Genus', 'interval', 'trait', 'value')
+  dat = dcast(dat, Genus+trait~interval)
+  names(dat) = c('Genus', 'trait', 'lower', 'upper')
   dat$trait = paste0("PC", dat$trait)
   order.list = paste0("PC", 1:n)
   dat$trait = factor(dat$trait, levels = order.list)
   # levels(dat$pop) <- Gnames
   dat$mean = rowMeans(cbind(dat$upper, dat$lower))
-  plot = ggplot(dat, aes(pop, mean)) + geom_point() +
+  plot = ggplot(dat, aes(Genus, mean)) + geom_point() +
       geom_errorbar(aes( ymin=lower, ymax=upper)) + theme_bw() +
       theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
      ylab('Genetic Variance') + facet_wrap(~ trait, ncol = ncols, scales = "free_y")

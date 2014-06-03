@@ -45,7 +45,9 @@ krz.plot = PlotKrzSubspace(dat.krz)
 print(krz.plot)
 ggsave("~/Desktop/krz_projection.png", height = 20, width = 30, units = "cm")
 
-# divergent.eigen = round(eigen(MCMCG.kr.xenartra$avH)$vectors,3)[,1:10]
-# rownames(divergent.eigen) = dimnames(Ps)[[1]]
-#
-# eigen.correlation = abs(cos(round(apply(MCMCG.kr.xenartra$MCMC.H.theta,1:2,mean),1))[1:10,])
+divEigen <- function(x, vec=1){
+ divergent.eigen = eigen(x$obs$avH)$vectors[,1:vec]
+ rownames(divergent.eigen) = dimnames(Ps)[[1]]
+ abs(cos(round(apply(x$obs$MCMC.H.theta,1:2,mean),1))[1:vec,])
+}
+lapply(MCMC.kr, divEigen)
