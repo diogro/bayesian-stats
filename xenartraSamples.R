@@ -5,6 +5,7 @@ library(matrixcalc)
 library(ggplot2)
 library(Morphometrics)
 library(reshape2)
+Sys.setlocale(locale="C")
 
 load("./maindata.RData")
 
@@ -24,7 +25,7 @@ getModel <- function(otu){
 }
 
 runMCMCModel <- function(otu, num.traits){
-    trait.names = rownames(otu$vcv[[paste("D", num.traits, sep='')]])
+    trait.names = rownames(otu$vcv[[paste0("D", num.traits)]])
     traits = paste("cbind(", paste(trait.names, collapse=','), ")", sep = '')
     formula = paste(traits, otu$fixed, sep = "~")
     prior = list(R = list(V = diag(num.traits), n = num.traits+1))
@@ -42,7 +43,7 @@ runMCMCModel <- function(otu, num.traits){
         return(Ps)
     }, error = function(cond){
         warning("scaling data")
-        #prior = list(R = list(V = otu$vcv[[paste("D", num.traits, sep='')]], n = num.traits+50))
+        print(otu$data$ESPECIE[[1]])
         data = data.frame(scale(otu$data[complete.cases(otu$data[,trait.names]),trait.names], scale = TRUE),
                           otu$data[complete.cases(otu$data[,trait.names]),!names(otu$data) %in% trait.names])
         mcmc.model = MCMCglmm(as.formula(formula),
@@ -53,7 +54,9 @@ runMCMCModel <- function(otu, num.traits){
                               family = rep("gaussian", num.traits),
                               verbose = FALSE)
         Ps = array(mcmc.model$VCV, dim = c(100, num.traits, num.traits))
+        Ps = aaply(Ps, 1, cov2cor)
         vars = mcmcVar(otu, num.traits)
+        #Ps = aaply(Ps, 1, '*', vars)
         Ps = Ps * vars
         Ps = aperm(Ps, c(2,3,1))
         dimnames(Ps) = list(trait.names, trait.names)
@@ -62,6 +65,8 @@ runMCMCModel <- function(otu, num.traits){
     return(Ps)
 }
 
+otu = x$'Myrmecophaga'
+num.traits = 25
 mcmcVar <- function(otu, num.traits){
     trait.names = rownames(otu$vcv[[paste("D", num.traits, sep='')]])
     traits = paste("cbind(", paste(trait.names, collapse=','), ")", sep = '')
@@ -77,6 +82,7 @@ mcmcVar <- function(otu, num.traits){
                           thin = 100,
                           verbose = FALSE)
     vars = aaply(mcmc.model$VCV, 1, function(x) outer(sqrt(x), sqrt(x)))
+    #vars = colMeans(vars)
     return(vars)
 }
 
@@ -86,36 +92,32 @@ for(i in 1:length(x)){
   x[[i]]$data <- cbind(x[[i]]$raw, x[[i]]$categorical)
   x[[i]]$fixed <- getModel(x[[i]])
 }
-x$Myrmecophaga$fixed <- "trait - 1"
+
 
 generateMCMCArray = function(num.traits){
   mask = !laply(x, function(otu) all(is.na(otu$vcv[[paste0("D", num.traits)]])))
-  Ps = laply(x[mask], function(x) runMCMCModel(x, num.traits), .progress='text', .inform = TRUE)
+  Ps = laply(x[mask], function(x) runMCMCModel(x, num.traits), .progress='text', .inform = TRUE, .parallel = TRUE)
   Ps = aperm(Ps, c(2,3,1,4))
   dimnames(Ps)[[3]] = names(x[mask])
   return(Ps)
 }
 
-#Ps = list()
-#Ps[['25']] = generateMCMCArray(25)
-#Ps[['28']] = generateMCMCArray(28)
-#Ps[['32']] = generateMCMCArray(32)
-#Ps[['35']] = generateMCMCArray(35)
-#save(Ps, file = "xenartraMCMCsamples.Rdata")
-load("./xenartraMCMCsamples.Rdata")
+library(doMC)
+registerDoMC(10)
 
-#num.traits = 25
-#otu = x$Myrmecophaga
-#Ps = runMCMCModel(x$Myrmecophaga, 25)
-#RandomSkewers(apply(Ps, 1:2, mean), x$Myrmecophaga$vcv$D25)
-#Ps = runMCMCModel(x$Myrmecophaga, 28)
-#RandomSkewers(apply(Ps, 1:2, mean), x$Myrmecophaga$vcv$D28)
-#Ps = runMCMCModel(x$Myrmecophaga, 32)
-#RandomSkewers(apply(Ps, 1:2, mean), x$Myrmecophaga$vcv$D32)
-#Ps = runMCMCModel(x$Myrmecophaga, 35)
-#RandomSkewers(apply(Ps, 1:2, mean), x$Myrmecophaga$vcv$D35)
+Ps = list()
+Ps[['25']] = generateMCMCArray(25)
+Ps[['28']] = generateMCMCArray(28)
+Ps[['32']] = generateMCMCArray(32)
+Ps[['35']] = generateMCMCArray(35)
+save(Ps, file = "xenartraMCMCsamples.Rdata")
+#load("./xenartraMCMCsamples.Rdata")
 
-#avPs = apply(Ps[['25']], 1:3, mean)
-#mat.list = alply(avPs, 3)
-#mats = llply(x, function(x) x$vcv$D25)
-#for(i in 1: length(mats)) { print(names(x)[[i]]); print(RandomSkewers(mats[[i]], mat.list[[i]]))}
+avPs = apply(Ps[['25']], 1:3, mean)
+mat.list = alply(avPs, 3)
+mats = llply(x, function(x) x$vcv$D25)
+(Map(function(x, y) MatrixCompare(x, y)[,1], mats, mat.list))
+
+i = 1
+RandomSkewers(alply(Ps[['25']][,,i,], 3), mats[[i]], num.cores=10)
+plot(laply(mats, function(x) sum(diag(x)))~laply(mat.list, function(x) sum(diag(x))))
