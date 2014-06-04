@@ -7,7 +7,7 @@ library(Morphometrics)
 library(reshape2)
 Sys.setlocale(locale="C")
 
-load("./maindata.RData")
+load("./Rdatas/maindata.RData")
 
 getModel = function(otu){
   models = otu$model[!is.na(otu$model)]
@@ -101,16 +101,16 @@ generateMCMCArray = function(num.traits){
   return(Ps)
 }
 
-library(doMC)
-registerDoMC(10)
+#library(doMC)
+#registerDoMC(10)
 
-Ps = list()
-Ps[['25']] = generateMCMCArray(25)
-Ps[['28']] = generateMCMCArray(28)
-Ps[['32']] = generateMCMCArray(32)
-Ps[['35']] = generateMCMCArray(35)
-save(Ps, file = "xenartraMCMCsamples.Rdata")
-#load("./xenartraMCMCsamples.Rdata")
+#Ps = list()
+#Ps[['25']] = generateMCMCArray(25)
+#Ps[['28']] = generateMCMCArray(28)
+#Ps[['32']] = generateMCMCArray(32)
+#Ps[['35']] = generateMCMCArray(35)
+#save(Ps, file = "xenartraMCMCsamples.Rdata")
+load("./Rdatas/xenartraMCMCsamples.Rdata")
 
 avPs = apply(Ps[['25']], 1:3, mean)
 mat.list = alply(avPs, 3)
