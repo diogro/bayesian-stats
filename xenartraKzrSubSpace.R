@@ -43,7 +43,7 @@ dat.krz = ldply(names(MCMC.kr),
 
 krz.plot = PlotKrzSubspace(dat.krz)
 print(krz.plot)
-ggsave("~/Desktop/krz_projection.png", height = 20, width = 30, units = "cm")
+ggsave("~/Desktop/krz_projection.tiff", height = 20, width = 30, units = "cm")
 
 divEigen <- function(x, vec=1){
  divergent.eigen = eigen(x$obs$avH)$vectors[,1:vec]

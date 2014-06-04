@@ -46,7 +46,7 @@ dat.cov.tensor = ldply(names(MCMC.covTensor),
                                                        as.numeric(x)))
 
 cov.tensor.plot = PlotCovTensor(dat.cov.tensor)
-ggsave("~/Desktop/cov_tensor_plot.png")
+ggsave("~/Desktop/cov_tensor_plot.tiff")
 
 m = dim(Ps)[3]
 n = dim(Ps)[1]
