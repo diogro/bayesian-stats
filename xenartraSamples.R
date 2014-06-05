@@ -28,7 +28,7 @@ runMCMCModel = function(otu, num.traits){
     trait.names = rownames(otu$vcv[[paste0("D", num.traits)]])
     traits = paste("cbind(", paste(trait.names, collapse=','), ")", sep = '')
     formula = paste(traits, otu$fixed, sep = "~")
-    prior = list(R = list(V = diag(num.traits), n = num.traits+1))
+    prior = list(R = list(V = diag(num.traits) * 0.02, n = num.traits + 1))
     Ps = tryCatch({
         mcmc.model = MCMCglmm(as.formula(formula),
                               data = otu$data[complete.cases(otu$data[,trait.names]),],
@@ -44,7 +44,8 @@ runMCMCModel = function(otu, num.traits){
     }, error = function(cond){
         warning("scaling data")
         print(otu$data$ESPECIE[[1]])
-        data = data.frame(scale(otu$data[complete.cases(otu$data[,trait.names]),trait.names], scale = TRUE),
+        prior = list(R = list(V = diag(num.traits), n = num.traits + 1))
+        data = data.frame(scale(otu$data[complete.cases(otu$data[,trait.names]),trait.names]),
                           otu$data[complete.cases(otu$data[,trait.names]),!names(otu$data) %in% trait.names])
         mcmc.model = MCMCglmm(as.formula(formula),
                               data = data,
@@ -71,12 +72,10 @@ mcmcVar = function(otu, num.traits){
     trait.names = rownames(otu$vcv[[paste("D", num.traits, sep='')]])
     traits = paste("cbind(", paste(trait.names, collapse=','), ")", sep = '')
     formula = paste(traits, otu$fixed, sep = "~")
-    prior = list(R = list(V = diag(num.traits), n = num.traits+1))
     data = data.frame(scale(otu$data[complete.cases(otu$data[,trait.names]),trait.names], scale = FALSE),
                       otu$data[complete.cases(otu$data[,trait.names]),!names(otu$data) %in% trait.names])
     mcmc.model = MCMCglmm(as.formula(formula),
                           data = data,
-                          prior = prior,
                           rcov = ~idh(trait):units,
                           family = rep("gaussian", num.traits),
                           thin = 100,
@@ -101,24 +100,21 @@ generateMCMCArray = function(num.traits){
   return(Ps)
 }
 
-#library(doMC)
-#registerDoMC(10)
+library(doMC)
+registerDoMC(10)
 
-#Ps = list()
-#Ps[['25']] = generateMCMCArray(25)
-#Ps[['28']] = generateMCMCArray(28)
-#Ps[['32']] = generateMCMCArray(32)
-#Ps[['35']] = generateMCMCArray(35)
-#save(Ps, file = "xenartraMCMCsamples.Rdata")
-load("./Rdatas/xenartraMCMCsamples.Rdata")
+Ps = list()
+Ps[['25']] = generateMCMCArray(25)
+Ps[['28']] = generateMCMCArray(28)
+Ps[['32']] = generateMCMCArray(32)
+Ps[['35']] = generateMCMCArray(35)
+save(Ps, file = "xenartraMCMCsamples.Rdata")
+#load("./Rdatas/xenartraMCMCsamples.Rdata")
 
-avPs = apply(Ps[['25']], 1:3, mean)
-mat.list = alply(avPs, 3)
-mats = llply(x, function(x) x$vcv$D25)
-(Map(function(x, y) MatrixCompare(x, y)[,1], mats, mat.list))
+p_list = alply(Ps[['25']], 3)
+p_list = llply(p_list, function(x) alply(x, 3))
+names(p_list) = sample.size[,1]
+mats.ML = llply(x, function(x) x$vcv$D25)
+comps = ldply(Map(function(x, y) mean(RandomSkewers(x, y, num.cores = 10)[,2]), p_list, mats.ML))
+plot(comps[,2]~sample.size$D25)
 
-i = 1
-RandomSkewers(alply(Ps[['25']][,,i,], 3), mats[[i]], num.cores=10)
-
-#diags = melt(adply(Ps[[1]], 3, function(x) aaply(x, 3, diag)))
-#ggplot(diags, aes(X1, value, color = X1)) + geom_boxplot() + facet_wrap(~variable, scale= "free")
