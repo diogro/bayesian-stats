@@ -111,8 +111,7 @@ Ps[['35']] = generateMCMCArray(35)
 save(Ps, file = "xenartraMCMCsamples.Rdata")
 #load("./Rdatas/xenartraMCMCsamples.Rdata")
 
-p_list = alply(Ps[['25']], 3)
-p_list = llply(p_list, function(x) alply(x, 3))
+p_list = llply(alply(Ps[['25']], 3), function(x) alply(x, 3))
 names(p_list) = sample.size[,1]
 mats.ML = llply(x, function(x) x$vcv$D25)
 comps = ldply(Map(function(x, y) mean(RandomSkewers(x, y, num.cores = 10)[,2]), p_list, mats.ML))

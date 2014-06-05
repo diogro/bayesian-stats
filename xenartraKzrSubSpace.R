@@ -1,7 +1,7 @@
 source('./KrzSubspace.R')
 library(Morphometrics)
 
-KrzMCMC = function(Ps, tree, sample.size) {
+KrzMCMC = function(Ps, sample.size) {
     m = dim(Ps)[3]
     n = dim(Ps)[1]
     SamplePop = function(pop_Ps, n.ind, otu){
@@ -26,15 +26,12 @@ KrzMCMC = function(Ps, tree, sample.size) {
                 rand = MCMCG.kr.rand))
 }
 
-load('./maindata.RData')
+load('./Rdatas/maindata.RData')
 sample.size = ldply(x, function(x) as.data.frame(x$df))
 
-MCMC.kr = list()
-
-MCMC.kr[['25']] = KrzMCMC(Ps[['25']], tree.25, sample.size$D25)
-MCMC.kr[['28']] = KrzMCMC(Ps[['28']], tree.25, sample.size$D28)
-MCMC.kr[['32']] = KrzMCMC(Ps[['32']], tree.35, sample.size$D32)
-MCMC.kr[['35']] = KrzMCMC(Ps[['35']], tree.35, sample.size$D35)
+MCMC.kr = c('25', '28', '32', '35')
+MCMC.kr = alply(MCMC.kr, 1, function(traits) KrzMCMC(Ps[[traits]], sample.size[[paste0('D', traits)]]), .parallel = TRUE)
+names(MCMC.kr) <- c('25', '28', '32', '35')
 
 dat.krz = ldply(names(MCMC.kr),
                 function(x) KrzSubspaceDataFrame (MCMC.kr[[x]][[1]],
@@ -43,11 +40,11 @@ dat.krz = ldply(names(MCMC.kr),
 
 krz.plot = PlotKrzSubspace(dat.krz)
 print(krz.plot)
-ggsave("~/Desktop/krz_projection.tiff", height = 20, width = 30, units = "cm")
+ggsave("~/Desktop/krz_projection.tiff", krz.plot, height = 20, width = 30, units = "cm")
 
 divEigen <- function(x, vec=1){
  divergent.eigen = eigen(x$obs$avH)$vectors[,1:vec]
  rownames(divergent.eigen) = dimnames(Ps)[[1]]
  abs(cos(round(apply(x$obs$MCMC.H.theta,1:2,mean),1))[1:vec,])
 }
-lapply(MCMC.kr, divEigen)
+lapply(MCMC.kr, divEigen, 5)
